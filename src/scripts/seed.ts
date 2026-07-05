@@ -5,7 +5,11 @@ import { User } from '../modules/user/user.model.js';
 import { Product } from '../modules/product/product.model.js';
 import { Customer } from '../modules/customer/customer.model.js';
 import { Sale } from '../modules/sales/sales.model.js';
+import { Role } from '../modules/role/role.model.js';
 import { ROLES } from '../common/constants/roles.js';
+import { DEFAULT_ROLE_PERMISSIONS } from '../common/constants/permissions.js';
+
+// ── Data ──────────────────────────────────────────────────────────────────────
 
 const userSeeds = [
   { name: 'Admin User', email: process.env.SEED_ADMIN_EMAIL!, password: process.env.SEED_ADMIN_PASSWORD!, role: ROLES.ADMIN },
@@ -39,12 +43,11 @@ const customerSeeds = [
   { name: 'Vandelay Industries', phone: '+1-555-0110', email: 'art@vandelay.com', address: '129 W 81st St, New York, NY 10024' },
 ];
 
-// ── Provided IDs ─────────────────────────────────────────────────────────────
 const C = {
-  acme:    new Types.ObjectId('6a4aae3469c71be699a06761'),
-  globex:  new Types.ObjectId('6a4aae3469c71be699a06760'),
-  initech: new Types.ObjectId('6a4aae3469c71be699a0675f'),
-  umbrella:new Types.ObjectId('6a4aae3469c71be699a0675e'),
+  acme:     new Types.ObjectId('6a4aae3469c71be699a06761'),
+  globex:   new Types.ObjectId('6a4aae3469c71be699a06760'),
+  initech:  new Types.ObjectId('6a4aae3469c71be699a0675f'),
+  umbrella: new Types.ObjectId('6a4aae3469c71be699a0675e'),
 };
 
 const P = {
@@ -99,6 +102,16 @@ const buildSaleSeeds = (adminId: Types.ObjectId) => [
 ];
 
 // ── Seeders ───────────────────────────────────────────────────────────────────
+
+const seedRoles = async () => {
+  for (const [name, permissions] of Object.entries(DEFAULT_ROLE_PERMISSIONS)) {
+    const exists = await Role.findOne({ name });
+    if (exists) { console.log(`⏭  Skipping role ${name} — already exists`); continue; }
+    await Role.create({ name, permissions });
+    console.log(`✅ Created role: ${name} (${permissions.length} permissions)`);
+  }
+};
+
 const seedUsers = async () => {
   for (const seed of userSeeds) {
     const exists = await User.findOne({ email: seed.email });
@@ -129,21 +142,23 @@ const seedCustomers = async () => {
 const seedSales = async () => {
   const admin = await User.findOne({ role: ROLES.ADMIN }).lean();
   if (!admin) { console.log('⚠️  No admin user found — skipping sales seed'); return; }
-
   const existing = await Sale.countDocuments();
   if (existing > 0) { console.log(`⏭  Skipping sales — ${existing} sale(s) already exist`); return; }
-
   const seeds = buildSaleSeeds(admin._id as Types.ObjectId);
   await Sale.insertMany(seeds);
   console.log(`✅ Created ${seeds.length} sales`);
 };
 
 // ── Run ───────────────────────────────────────────────────────────────────────
+
 const run = async () => {
   await mongoose.connect(env.MONGODB_URI);
   console.log('Connected to DB\n');
 
-  console.log('--- Users ---');
+  console.log('--- Roles ---');
+  await seedRoles();
+
+  console.log('\n--- Users ---');
   await seedUsers();
 
   console.log('\n--- Products ---');
