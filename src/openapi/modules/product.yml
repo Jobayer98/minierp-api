@@ -1,0 +1,239 @@
+paths:
+  /products:
+    get:
+      tags: [Products]
+      summary: List products
+      description: Returns a paginated, searchable, filterable list of active products.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/QueryPage'
+        - $ref: '#/components/parameters/QueryLimit'
+        - $ref: '#/components/parameters/QuerySearch'
+        - $ref: '#/components/parameters/QuerySortBy'
+        - name: category
+          in: query
+          description: Filter by category.
+          schema:
+            type: string
+            example: "Electronics"
+      responses:
+        "200":
+          description: Paginated product list.
+          content:
+            application/json:
+              example:
+                success: true
+                message: "Products fetched"
+                data:
+                  - _id: "64f1a2b3c4d5e6f7a8b9c0d1"
+                    name: "Wireless Mouse"
+                    sku: "WM-1001"
+                    category: "Electronics"
+                    purchasePrice: 12.50
+                    sellingPrice: 24.99
+                    stockQuantity: 150
+                    imageUrl: "/uploads/wm-1001-abc123.jpg"
+                    isActive: true
+                    createdAt: "2024-07-05T08:00:00.000Z"
+                    updatedAt: "2024-07-05T08:00:00.000Z"
+                meta:
+                  page: 1
+                  limit: 10
+                  total: 42
+                  totalPages: 5
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      tags: [Products]
+      summary: Create product
+      description: Creates a new product. Image upload is required. Accessible by Admin and Manager only.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [name, sku, category, purchasePrice, sellingPrice, stockQuantity, image]
+              properties:
+                name:
+                  type: string
+                  example: "Wireless Mouse"
+                sku:
+                  type: string
+                  example: "WM-1001"
+                category:
+                  type: string
+                  example: "Electronics"
+                purchasePrice:
+                  type: number
+                  example: 12.50
+                sellingPrice:
+                  type: number
+                  example: 24.99
+                stockQuantity:
+                  type: integer
+                  example: 150
+                image:
+                  type: string
+                  format: binary
+                  description: "Product image (JPEG/PNG/WEBP, max 2MB)"
+      responses:
+        "201":
+          description: Product created.
+          content:
+            application/json:
+              example:
+                success: true
+                message: "Product created successfully"
+                data:
+                  _id: "64f1a2b3c4d5e6f7a8b9c0d1"
+                  name: "Wireless Mouse"
+                  sku: "WM-1001"
+                  category: "Electronics"
+                  purchasePrice: 12.50
+                  sellingPrice: 24.99
+                  stockQuantity: 150
+                  imageUrl: "/uploads/wm-1001-abc123.jpg"
+                  isActive: true
+                  createdAt: "2024-07-05T08:00:00.000Z"
+                  updatedAt: "2024-07-05T08:00:00.000Z"
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "409":
+          $ref: '#/components/responses/Conflict'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+  /products/{id}:
+    get:
+      tags: [Products]
+      summary: Get product by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        "200":
+          description: Single product.
+          content:
+            application/json:
+              example:
+                success: true
+                message: "Product fetched"
+                data:
+                  _id: "64f1a2b3c4d5e6f7a8b9c0d1"
+                  name: "Wireless Mouse"
+                  sku: "WM-1001"
+                  category: "Electronics"
+                  purchasePrice: 12.50
+                  sellingPrice: 24.99
+                  stockQuantity: 150
+                  imageUrl: "/uploads/wm-1001-abc123.jpg"
+                  isActive: true
+                  createdAt: "2024-07-05T08:00:00.000Z"
+                  updatedAt: "2024-07-05T08:00:00.000Z"
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+    patch:
+      tags: [Products]
+      summary: Update product
+      description: Updates product fields. Image is optional. Accessible by Admin and Manager only.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Wireless Mouse Pro"
+                category:
+                  type: string
+                  example: "Electronics"
+                purchasePrice:
+                  type: number
+                  example: 14.00
+                sellingPrice:
+                  type: number
+                  example: 29.99
+                stockQuantity:
+                  type: integer
+                  example: 200
+                image:
+                  type: string
+                  format: binary
+                  description: "Replacement image (optional)"
+      responses:
+        "200":
+          description: Product updated.
+          content:
+            application/json:
+              example:
+                success: true
+                message: "Product updated successfully"
+                data:
+                  _id: "64f1a2b3c4d5e6f7a8b9c0d1"
+                  name: "Wireless Mouse Pro"
+                  sku: "WM-1001"
+                  category: "Electronics"
+                  purchasePrice: 14.00
+                  sellingPrice: 29.99
+                  stockQuantity: 200
+                  imageUrl: "/uploads/wm-1001-xyz456.jpg"
+                  isActive: true
+                  createdAt: "2024-07-05T08:00:00.000Z"
+                  updatedAt: "2024-07-05T10:00:00.000Z"
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      tags: [Products]
+      summary: Delete product
+      description: Soft-deletes a product (sets isActive to false). Admin only.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        "200":
+          description: Product deleted.
+          content:
+            application/json:
+              example:
+                success: true
+                message: "Product deleted successfully"
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalError'

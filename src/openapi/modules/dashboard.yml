@@ -1,0 +1,46 @@
+paths:
+  /dashboard/stats:
+    get:
+      tags: [Dashboard]
+      summary: Get dashboard stats
+      description: Returns aggregated counts for products, customers, and sales, plus a list of low-stock products (stockQuantity < 5).
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Dashboard statistics.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Dashboard stats fetched"
+                  data:
+                    $ref: '#/components/schemas/DashboardStats'
+              example:
+                success: true
+                message: "Dashboard stats fetched"
+                data:
+                  totalProducts: 128
+                  totalCustomers: 54
+                  totalSales: 342
+                  lowStockProducts:
+                    - _id: "64f1a2b3c4d5e6f7a8b9c0d5"
+                      name: "USB Cable"
+                      sku: "USB-01"
+                      stockQuantity: 3
+                    - _id: "64f1a2b3c4d5e6f7a8b9c0d6"
+                      name: "HDMI Adapter"
+                      sku: "HDMI-02"
+                      stockQuantity: 1
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalError'

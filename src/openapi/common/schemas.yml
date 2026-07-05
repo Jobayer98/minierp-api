@@ -1,0 +1,205 @@
+components:
+  schemas:
+
+    # ── Primitives ──────────────────────────────────────────────
+    ObjectId:
+      type: string
+      pattern: '^[a-f\d]{24}$'
+      example: "64f1a2b3c4d5e6f7a8b9c0d1"
+
+    Timestamps:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-07-05T08:00:00.000Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-07-05T09:30:00.000Z"
+
+    # ── Envelope ─────────────────────────────────────────────────
+    Meta:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 10
+        total:
+          type: integer
+          example: 42
+        totalPages:
+          type: integer
+          example: 5
+
+    # ── User ─────────────────────────────────────────────────────
+    UserRole:
+      type: string
+      enum: [admin, manager, employee]
+      example: admin
+
+    UserPublic:
+      type: object
+      properties:
+        _id:
+          $ref: '#/components/schemas/ObjectId'
+        name:
+          type: string
+          example: "John Doe"
+        email:
+          type: string
+          format: email
+          example: "john.doe@example.com"
+        role:
+          $ref: '#/components/schemas/UserRole'
+        isActive:
+          type: boolean
+          example: true
+      allOf:
+        - $ref: '#/components/schemas/Timestamps'
+
+    # ── Product ──────────────────────────────────────────────────
+    Product:
+      type: object
+      properties:
+        _id:
+          $ref: '#/components/schemas/ObjectId'
+        name:
+          type: string
+          example: "Wireless Mouse"
+        sku:
+          type: string
+          example: "WM-1001"
+        category:
+          type: string
+          example: "Electronics"
+        purchasePrice:
+          type: number
+          format: float
+          example: 12.50
+        sellingPrice:
+          type: number
+          format: float
+          example: 24.99
+        stockQuantity:
+          type: integer
+          example: 150
+        imageUrl:
+          type: string
+          example: "/uploads/wm-1001-abc123.jpg"
+        isActive:
+          type: boolean
+          example: true
+      allOf:
+        - $ref: '#/components/schemas/Timestamps'
+
+    # ── Customer ─────────────────────────────────────────────────
+    Customer:
+      type: object
+      properties:
+        _id:
+          $ref: '#/components/schemas/ObjectId'
+        name:
+          type: string
+          example: "Acme Corp"
+        phone:
+          type: string
+          example: "+1-555-0100"
+        email:
+          type: string
+          format: email
+          example: "contact@acmecorp.com"
+        address:
+          type: string
+          example: "123 Main St, Springfield, IL 62701"
+      allOf:
+        - $ref: '#/components/schemas/Timestamps'
+
+    # ── Sale ─────────────────────────────────────────────────────
+    SaleItem:
+      type: object
+      properties:
+        product:
+          $ref: '#/components/schemas/ObjectId'
+        productName:
+          type: string
+          example: "Wireless Mouse"
+        quantity:
+          type: integer
+          example: 2
+        unitPrice:
+          type: number
+          format: float
+          example: 24.99
+        subtotal:
+          type: number
+          format: float
+          example: 49.98
+
+    Sale:
+      type: object
+      properties:
+        _id:
+          $ref: '#/components/schemas/ObjectId'
+        customer:
+          $ref: '#/components/schemas/Customer'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SaleItem'
+        grandTotal:
+          type: number
+          format: float
+          example: 74.97
+        createdBy:
+          $ref: '#/components/schemas/UserPublic'
+      allOf:
+        - $ref: '#/components/schemas/Timestamps'
+
+    # ── Dashboard ────────────────────────────────────────────────
+    LowStockProduct:
+      type: object
+      properties:
+        _id:
+          $ref: '#/components/schemas/ObjectId'
+        name:
+          type: string
+          example: "USB Cable"
+        sku:
+          type: string
+          example: "USB-01"
+        stockQuantity:
+          type: integer
+          example: 3
+
+    DashboardStats:
+      type: object
+      properties:
+        totalProducts:
+          type: integer
+          example: 128
+        totalCustomers:
+          type: integer
+          example: 54
+        totalSales:
+          type: integer
+          example: 342
+        lowStockProducts:
+          type: array
+          items:
+            $ref: '#/components/schemas/LowStockProduct'
+
+    # ── Validation Error ─────────────────────────────────────────
+    FieldError:
+      type: object
+      properties:
+        field:
+          type: string
+          example: "email"
+        message:
+          type: string
+          example: "Invalid email address"

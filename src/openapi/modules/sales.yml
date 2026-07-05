@@ -1,0 +1,199 @@
+paths:
+  /sales:
+    get:
+      tags: [Sales]
+      summary: List sales
+      description: Returns paginated sale history. All authenticated roles.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/QueryPage'
+        - $ref: '#/components/parameters/QueryLimit'
+        - $ref: '#/components/parameters/QuerySortBy'
+      responses:
+        "200":
+          description: Paginated sales list.
+          content:
+            application/json:
+              example:
+                success: true
+                message: "Sales fetched"
+                data:
+                  - _id: "64f1a2b3c4d5e6f7a8b9c0d3"
+                    customer:
+                      _id: "64f1a2b3c4d5e6f7a8b9c0d2"
+                      name: "Acme Corp"
+                      phone: "+1-555-0100"
+                    items:
+                      - product: "64f1a2b3c4d5e6f7a8b9c0d1"
+                        productName: "Wireless Mouse"
+                        quantity: 2
+                        unitPrice: 24.99
+                        subtotal: 49.98
+                      - product: "64f1a2b3c4d5e6f7a8b9c0d4"
+                        productName: "USB Hub"
+                        quantity: 1
+                        unitPrice: 24.99
+                        subtotal: 24.99
+                    grandTotal: 74.97
+                    createdBy:
+                      _id: "64f1a2b3c4d5e6f7a8b9c0d1"
+                      name: "Admin User"
+                      role: "admin"
+                    createdAt: "2024-07-05T09:00:00.000Z"
+                    updatedAt: "2024-07-05T09:00:00.000Z"
+                meta:
+                  page: 1
+                  limit: 10
+                  total: 342
+                  totalPages: 35
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      tags: [Sales]
+      summary: Create sale
+      description: |
+        Creates a new sale. Server-side logic:
+        1. Validates all product IDs and stock availability.
+        2. Snapshots `productName` and `unitPrice` at time of sale.
+        3. Atomically decrements stock and inserts the sale in a Mongoose transaction.
+        
+        Returns `400` with the offending SKU if any item has insufficient stock.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [customer, items]
+              properties:
+                customer:
+                  $ref: '#/components/schemas/ObjectId'
+                items:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: object
+                    required: [product, quantity]
+                    properties:
+                      product:
+                        $ref: '#/components/schemas/ObjectId'
+                      quantity:
+                        type: integer
+                        minimum: 1
+                        example: 2
+            example:
+              customer: "64f1a2b3c4d5e6f7a8b9c0d2"
+              items:
+                - product: "64f1a2b3c4d5e6f7a8b9c0d1"
+                  quantity: 2
+                - product: "64f1a2b3c4d5e6f7a8b9c0d4"
+                  quantity: 1
+      responses:
+        "201":
+          description: Sale created successfully.
+          content:
+            application/json:
+              example:
+                success: true
+                message: "Sale created successfully"
+                data:
+                  _id: "64f1a2b3c4d5e6f7a8b9c0d3"
+                  customer:
+                    _id: "64f1a2b3c4d5e6f7a8b9c0d2"
+                    name: "Acme Corp"
+                    phone: "+1-555-0100"
+                  items:
+                    - product: "64f1a2b3c4d5e6f7a8b9c0d1"
+                      productName: "Wireless Mouse"
+                      quantity: 2
+                      unitPrice: 24.99
+                      subtotal: 49.98
+                    - product: "64f1a2b3c4d5e6f7a8b9c0d4"
+                      productName: "USB Hub"
+                      quantity: 1
+                      unitPrice: 24.99
+                      subtotal: 24.99
+                  grandTotal: 74.97
+                  createdBy: "64f1a2b3c4d5e6f7a8b9c0d1"
+                  createdAt: "2024-07-05T09:00:00.000Z"
+                  updatedAt: "2024-07-05T09:00:00.000Z"
+        "400":
+          description: Validation failure or insufficient stock.
+          content:
+            application/json:
+              examples:
+                validationError:
+                  summary: Empty items array
+                  value:
+                    success: false
+                    message: "Validation failed"
+                    errors:
+                      - field: "items"
+                        message: "At least one item is required"
+                insufficientStock:
+                  summary: Insufficient stock
+                  value:
+                    success: false
+                    message: "Insufficient stock for product SKU WM-1001"
+                    errors:
+                      - field: "quantity"
+                        message: "Only 3 units available"
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+  /sales/{id}:
+    get:
+      tags: [Sales]
+      summary: Get sale by ID
+      description: Returns a single sale with populated customer and item details.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        "200":
+          description: Single sale detail.
+          content:
+            application/json:
+              example:
+                success: true
+                message: "Sale fetched"
+                data:
+                  _id: "64f1a2b3c4d5e6f7a8b9c0d3"
+                  customer:
+                    _id: "64f1a2b3c4d5e6f7a8b9c0d2"
+                    name: "Acme Corp"
+                    phone: "+1-555-0100"
+                    email: "contact@acmecorp.com"
+                  items:
+                    - product: "64f1a2b3c4d5e6f7a8b9c0d1"
+                      productName: "Wireless Mouse"
+                      quantity: 2
+                      unitPrice: 24.99
+                      subtotal: 49.98
+                    - product: "64f1a2b3c4d5e6f7a8b9c0d4"
+                      productName: "USB Hub"
+                      quantity: 1
+                      unitPrice: 24.99
+                      subtotal: 24.99
+                  grandTotal: 74.97
+                  createdBy:
+                    _id: "64f1a2b3c4d5e6f7a8b9c0d1"
+                    name: "Admin User"
+                    role: "admin"
+                  createdAt: "2024-07-05T09:00:00.000Z"
+                  updatedAt: "2024-07-05T09:00:00.000Z"
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalError'

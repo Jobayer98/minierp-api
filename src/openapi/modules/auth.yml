@@ -1,0 +1,125 @@
+paths:
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login
+      description: Authenticate with email and password. Returns a signed JWT access token.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "admin@example.com"
+                password:
+                  type: string
+                  format: password
+                  example: "secret123"
+      responses:
+        "200":
+          description: Login successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Login successful"
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        type: object
+                        properties:
+                          id:
+                            $ref: '#/components/schemas/ObjectId'
+                          name:
+                            type: string
+                            example: "Admin User"
+                          email:
+                            type: string
+                            example: "admin@example.com"
+                          role:
+                            $ref: '#/components/schemas/UserRole'
+                      accessToken:
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0ZjFhMmIzYzRkNWU2ZjdhOGI5YzBkMSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTcyMDAwMDAwMCwiZXhwIjoxNzIwMDg2NDAwfQ.placeholder"
+              example:
+                success: true
+                message: "Login successful"
+                data:
+                  user:
+                    id: "64f1a2b3c4d5e6f7a8b9c0d1"
+                    name: "Admin User"
+                    email: "admin@example.com"
+                    role: "admin"
+                  accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder"
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          description: Invalid email or password.
+          content:
+            application/json:
+              example:
+                success: false
+                message: "Invalid email or password"
+        "429":
+          description: Too many login attempts.
+          content:
+            application/json:
+              example:
+                success: false
+                message: "Too many requests, please try again later."
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Get current user
+      description: Returns the profile of the currently authenticated user.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current user profile.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "User fetched"
+                  data:
+                    $ref: '#/components/schemas/UserPublic'
+              example:
+                success: true
+                message: "User fetched"
+                data:
+                  _id: "64f1a2b3c4d5e6f7a8b9c0d1"
+                  name: "Admin User"
+                  email: "admin@example.com"
+                  role: "admin"
+                  isActive: true
+                  createdAt: "2024-07-05T08:00:00.000Z"
+                  updatedAt: "2024-07-05T08:00:00.000Z"
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalError'

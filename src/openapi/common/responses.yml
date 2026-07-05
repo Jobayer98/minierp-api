@@ -1,0 +1,116 @@
+components:
+  responses:
+
+    # ── Success ──────────────────────────────────────────────────
+    NoContent:
+      description: Operation successful, no content returned.
+
+    # ── Client Errors ────────────────────────────────────────────
+    BadRequest:
+      description: Validation failed or bad input.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Validation failed"
+              errors:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FieldError'
+          example:
+            success: false
+            message: "Validation failed"
+            errors:
+              - field: "email"
+                message: "Invalid email address"
+
+    Unauthorized:
+      description: Missing or invalid JWT token.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "No token provided"
+          example:
+            success: false
+            message: "No token provided"
+
+    Forbidden:
+      description: Authenticated but insufficient role permissions.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Insufficient permissions"
+          example:
+            success: false
+            message: "Insufficient permissions"
+
+    NotFound:
+      description: Requested resource does not exist.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Resource not found"
+          example:
+            success: false
+            message: "Resource not found"
+
+    Conflict:
+      description: Duplicate unique field (e.g. SKU, email, phone).
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Duplicate value for sku"
+          example:
+            success: false
+            message: "Duplicate value for sku"
+
+    InternalError:
+      description: Unexpected server error.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Internal server error"
+          example:
+            success: false
+            message: "Internal server error"

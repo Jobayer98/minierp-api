@@ -1,0 +1,34 @@
+openapi: 3.0.3
+
+info:
+  title: Mini ERP API
+  description: REST API for Mini ERP — products, customers, sales, auth, and dashboard.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:5000/api/v1
+    description: Local development
+  - url: https://your-production-url.com/api/v1
+    description: Production
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Auth
+    description: Authentication and current user
+  - name: Products
+    description: Product management
+  - name: Customers
+    description: Customer management
+  - name: Sales
+    description: Sales creation and history
+  - name: Dashboard
+    description: Aggregated stats
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
