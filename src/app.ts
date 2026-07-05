@@ -10,6 +10,8 @@ import authRoutes from './modules/auth/auth.routes.js';
 import productRoutes from './modules/product/product.routes.js';
 import customerRoutes from './modules/customer/customer.routes.js';
 import salesRoutes from './modules/sales/sales.routes.js';
+import dashboardRoutes from './modules/dashboard/dashboard.routes.js';
+import roleRoutes from './modules/role/role.routes.js';
 import { buildSpec } from './openapi/loader.js';
 
 const app = express();
@@ -32,6 +34,8 @@ app.use(`${env.API_PREFIX}/auth`, authRoutes);
 app.use(`${env.API_PREFIX}/products`, productRoutes);
 app.use(`${env.API_PREFIX}/customers`, customerRoutes);
 app.use(`${env.API_PREFIX}/sales`, salesRoutes);
+app.use(`${env.API_PREFIX}/dashboard`, dashboardRoutes);
+app.use(`${env.API_PREFIX}/roles`, roleRoutes);
 
 // Health check
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
