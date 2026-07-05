@@ -1,20 +1,17 @@
 import { Router } from 'express';
 import { verifyToken } from '../../middlewares/auth.middleware.js';
-import { requireRole } from '../../middlewares/rbac.middleware.js';
+import { requirePermission } from '../../middlewares/permission.middleware.js';
 import { validate } from '../../middlewares/validate.middleware.js';
-import { ROLES } from '../../common/constants/roles.js';
+import { PERMISSIONS } from '../../common/constants/permissions.js';
 import { createCustomerSchema, updateCustomerSchema } from './customer.validation.js';
 import * as customerController from './customer.controller.js';
 
 const router = Router();
 
-const adminManager = [verifyToken, requireRole([ROLES.ADMIN, ROLES.MANAGER])];
-const adminOnly = [verifyToken, requireRole([ROLES.ADMIN])];
-
-router.get('/', adminManager, customerController.listCustomers);
-router.get('/:id', adminManager, customerController.getCustomer);
-router.post('/', adminManager, validate(createCustomerSchema), customerController.createCustomer);
-router.patch('/:id', adminManager, validate(updateCustomerSchema), customerController.updateCustomer);
-router.delete('/:id', adminOnly, customerController.deleteCustomer);
+router.get('/',      verifyToken, requirePermission(PERMISSIONS.CUSTOMER_READ),   customerController.listCustomers);
+router.get('/:id',   verifyToken, requirePermission(PERMISSIONS.CUSTOMER_READ),   customerController.getCustomer);
+router.post('/',     verifyToken, requirePermission(PERMISSIONS.CUSTOMER_CREATE),  validate(createCustomerSchema), customerController.createCustomer);
+router.patch('/:id', verifyToken, requirePermission(PERMISSIONS.CUSTOMER_UPDATE),  validate(updateCustomerSchema), customerController.updateCustomer);
+router.delete('/:id',verifyToken, requirePermission(PERMISSIONS.CUSTOMER_DELETE),  customerController.deleteCustomer);
 
 export default router;
