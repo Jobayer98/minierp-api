@@ -25,6 +25,8 @@ tags:
     description: Sales creation and history
   - name: Dashboard
     description: Aggregated stats
+  - name: Roles
+    description: Role and permission management (Admin only)
 
 components:
   securitySchemes:

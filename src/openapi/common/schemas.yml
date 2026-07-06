@@ -146,7 +146,13 @@ components:
         _id:
           $ref: '#/components/schemas/ObjectId'
         customer:
-          $ref: '#/components/schemas/Customer'
+          type: object
+          properties:
+            _id:
+              $ref: '#/components/schemas/ObjectId'
+            name:
+              type: string
+              example: "Acme Corp"
         items:
           type: array
           items:
@@ -156,9 +162,45 @@ components:
           format: float
           example: 74.97
         createdBy:
-          $ref: '#/components/schemas/UserPublic'
+          type: object
+          properties:
+            _id:
+              $ref: '#/components/schemas/ObjectId'
+            name:
+              type: string
+              example: "Admin User"
       allOf:
         - $ref: '#/components/schemas/Timestamps'
+
+    # ── Role ─────────────────────────────────────────────────────
+    Role:
+      type: object
+      properties:
+        _id:
+          $ref: '#/components/schemas/ObjectId'
+        name:
+          type: string
+          example: "employee"
+        permissions:
+          type: array
+          items:
+            type: string
+          example: ["product:read", "sale:read", "sale:create", "dashboard:read"]
+      allOf:
+        - $ref: '#/components/schemas/Timestamps'
+
+    PermissionsGrouped:
+      type: object
+      additionalProperties:
+        type: array
+        items:
+          type: string
+      example:
+        product: ["product:read", "product:create", "product:update", "product:delete"]
+        customer: ["customer:read", "customer:create", "customer:update", "customer:delete"]
+        sale: ["sale:read", "sale:create"]
+        dashboard: ["dashboard:read"]
+        role: ["role:manage"]
 
     # ── Dashboard ────────────────────────────────────────────────
     LowStockProduct:

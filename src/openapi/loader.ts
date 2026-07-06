@@ -43,6 +43,7 @@ export function buildSpec(): Record<string, unknown> {
     "modules/customer.yml",
     "modules/sales.yml",
     "modules/dashboard.yml",
+    "modules/role.yml",
   ];
 
   return files.reduce<Record<string, unknown>>((spec, file) => {
