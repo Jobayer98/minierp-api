@@ -1,20 +1,22 @@
-import express from 'express';
-import helmet from 'helmet';
-import cors from 'cors';
-import compression from 'compression';
-import swaggerUi from 'swagger-ui-express';
-import { env } from './config/env.js';
-import { notFound } from './middlewares/notFound.middleware.js';
-import { errorHandler } from './middlewares/errorHandler.middleware.js';
-import authRoutes from './modules/auth/auth.routes.js';
-import productRoutes from './modules/product/product.routes.js';
-import customerRoutes from './modules/customer/customer.routes.js';
-import salesRoutes from './modules/sales/sales.routes.js';
-import dashboardRoutes from './modules/dashboard/dashboard.routes.js';
-import roleRoutes from './modules/role/role.routes.js';
-import { buildSpec } from './openapi/loader.js';
+import express from "express";
+import helmet from "helmet";
+import cors from "cors";
+import compression from "compression";
+import swaggerUi from "swagger-ui-express";
+import { env } from "./config/env.js";
+import { notFound } from "./middlewares/notFound.middleware.js";
+import { errorHandler } from "./middlewares/errorHandler.middleware.js";
+import authRoutes from "./modules/auth/auth.routes.js";
+import productRoutes from "./modules/product/product.routes.js";
+import customerRoutes from "./modules/customer/customer.routes.js";
+import salesRoutes from "./modules/sales/sales.routes.js";
+import dashboardRoutes from "./modules/dashboard/dashboard.routes.js";
+import roleRoutes from "./modules/role/role.routes.js";
+import { buildSpec } from "./openapi/loader.js";
 
 const app = express();
+
+app.set("trust proxy", true);
 
 // Security & parsing
 app.use(helmet());
@@ -24,9 +26,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // API Docs
-if (env.NODE_ENV !== 'production') {
+if (env.NODE_ENV !== "production") {
   const spec = buildSpec();
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(spec));
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(spec));
 }
 
 // Routes
@@ -38,7 +40,7 @@ app.use(`${env.API_PREFIX}/dashboard`, dashboardRoutes);
 app.use(`${env.API_PREFIX}/roles`, roleRoutes);
 
 // Health check
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+app.get("/health", (_req, res) => res.json({ status: "ok" }));
 
 // Error handling
 app.use(notFound);
