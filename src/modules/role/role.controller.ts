@@ -14,10 +14,35 @@ export const getRole = asyncHandler(async (req: Request, res: Response) => {
   res.status(HTTP.OK).json(new ApiResponse('Role fetched', role));
 });
 
-export const updateRolePermissions = asyncHandler(async (req: Request, res: Response) => {
-  const role = await roleService.updateRolePermissions(
+export const listPermissions = asyncHandler(async (_req: Request, res: Response) => {
+  const permissions = roleService.listAvailablePermissions();
+  res.status(HTTP.OK).json(new ApiResponse('Available permissions fetched', permissions));
+});
+
+export const createRole = asyncHandler(async (req: Request, res: Response) => {
+  const role = await roleService.createRole(req.body.name, req.body.permissions ?? []);
+  res.status(HTTP.CREATED).json(new ApiResponse('Role created successfully', role));
+});
+
+export const deleteRole = asyncHandler(async (req: Request, res: Response) => {
+  await roleService.deleteRole(req.params['name'] as string);
+  res.status(HTTP.OK).json(new ApiResponse('Role deleted successfully'));
+});
+
+export const replacePermissions = asyncHandler(async (req: Request, res: Response) => {
+  const role = await roleService.replacePermissions(req.params['name'] as string, req.body.permissions);
+  res.status(HTTP.OK).json(new ApiResponse('Permissions updated', role));
+});
+
+export const addPermission = asyncHandler(async (req: Request, res: Response) => {
+  const role = await roleService.addPermission(req.params['name'] as string, req.body.permission);
+  res.status(HTTP.OK).json(new ApiResponse('Permission added', role));
+});
+
+export const removePermission = asyncHandler(async (req: Request, res: Response) => {
+  const role = await roleService.removePermission(
     req.params['name'] as string,
-    req.body.permissions,
+    req.params['permission'] as string,
   );
-  res.status(HTTP.OK).json(new ApiResponse('Role permissions updated', role));
+  res.status(HTTP.OK).json(new ApiResponse('Permission removed', role));
 });
