@@ -8,7 +8,7 @@ info:
 servers:
   - url: http://localhost:5000/api/v1
     description: Local development
-  - url: https://your-production-url.com/api/v1
+  - url: https://erp-api.jocode.live/api/v1
     description: Production
 
 security:
