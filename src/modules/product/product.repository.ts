@@ -4,8 +4,9 @@ import { buildQuery, ParsedQuery } from '../../common/utils/queryBuilder.js';
 export const findProducts = (query: ParsedQuery) =>
   buildQuery(Product, query, {
     searchableFields: ['name', 'sku'],
-    filterableFields: ['category', 'isActive'],
+    filterableFields: ['category'],
     defaultSort: '-createdAt',
+    baseFilter: { isActive: true },
   });
 
 export const findProductById = (id: string) =>

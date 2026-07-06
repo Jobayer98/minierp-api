@@ -1,10 +1,10 @@
-import mongoose from 'mongoose';
-import { Sale } from './sales.model.js';
-import { Product } from '../product/product.model.js';
-import { Customer } from '../customer/customer.model.js';
-import { ApiError } from '../../common/utils/ApiError.js';
-import { HTTP } from '../../common/constants/httpStatus.js';
-import { buildQuery, ParsedQuery } from '../../common/utils/queryBuilder.js';
+import mongoose from "mongoose";
+import { Sale } from "./sales.model.js";
+import { Product } from "../product/product.model.js";
+import { Customer } from "../customer/customer.model.js";
+import { ApiError } from "../../common/utils/ApiError.js";
+import { HTTP } from "../../common/constants/httpStatus.js";
+import { buildQuery, ParsedQuery } from "../../common/utils/queryBuilder.js";
 
 interface SaleItemInput {
   product: string;
@@ -17,33 +17,54 @@ interface CreateSaleInput {
   createdBy: string;
 }
 
-export const listSales = (query: ParsedQuery) =>
-  buildQuery(Sale, query, { defaultSort: '-createdAt' });
+export const listSales = async (query: ParsedQuery) => {
+  const { data, meta } = await buildQuery(Sale, query, {
+    defaultSort: "-createdAt",
+  });
+  const populated = await Sale.populate(data, [
+    { path: "customer", select: "name" },
+    { path: "createdBy", select: "name" },
+  ]);
+  return { data: populated, meta };
+};
 
 export const getSale = async (id: string) => {
   const sale = await Sale.findById(id)
-    .populate('customer', 'name phone email')
-    .populate('createdBy', 'name role')
+    .populate("customer", "name phone email")
+    .populate("createdBy", "name role")
     .lean();
-  if (!sale) throw new ApiError(HTTP.NOT_FOUND, 'Sale not found');
+  if (!sale) throw new ApiError(HTTP.NOT_FOUND, "Sale not found");
   return sale;
 };
 
-export const createSale = async ({ customer, items, createdBy }: CreateSaleInput) => {
+export const createSale = async ({
+  customer,
+  items,
+  createdBy,
+}: CreateSaleInput) => {
   // 1. Validate customer exists
   const customerDoc = await Customer.findById(customer).lean();
-  if (!customerDoc) throw new ApiError(HTTP.NOT_FOUND, 'Customer not found');
+  if (!customerDoc) throw new ApiError(HTTP.NOT_FOUND, "Customer not found");
 
   // 2. Fetch all products and validate stock
   const saleItems = await Promise.all(
     items.map(async ({ product, quantity }) => {
-      const doc = await Product.findOne({ _id: product, isActive: true }).lean();
-      if (!doc) throw new ApiError(HTTP.NOT_FOUND, `Product "${product}" not found`);
+      const doc = await Product.findOne({
+        _id: product,
+        isActive: true,
+      }).lean();
+      if (!doc)
+        throw new ApiError(HTTP.NOT_FOUND, `Product "${product}" not found`);
       if (doc.stockQuantity < quantity) {
         throw new ApiError(
           HTTP.BAD_REQUEST,
           `Insufficient stock for SKU "${doc.sku}" — only ${doc.stockQuantity} unit(s) available`,
-          [{ field: 'quantity', message: `Only ${doc.stockQuantity} units available` }],
+          [
+            {
+              field: "quantity",
+              message: `Only ${doc.stockQuantity} units available`,
+            },
+          ],
         );
       }
       return {
@@ -70,7 +91,10 @@ export const createSale = async ({ customer, items, createdBy }: CreateSaleInput
         { session, new: true },
       );
       if (!updated) {
-        throw new ApiError(HTTP.BAD_REQUEST, `Stock changed during transaction for product "${item.productName}"`);
+        throw new ApiError(
+          HTTP.BAD_REQUEST,
+          `Stock changed during transaction for product "${item.productName}"`,
+        );
       }
     }
 
@@ -82,8 +106,8 @@ export const createSale = async ({ customer, items, createdBy }: CreateSaleInput
     await session.commitTransaction();
 
     return Sale.findById(sale._id)
-      .populate('customer', 'name phone email')
-      .populate('createdBy', 'name role')
+      .populate("customer", "name")
+      .populate("createdBy", "name")
       .lean();
   } catch (err) {
     await session.abortTransaction();

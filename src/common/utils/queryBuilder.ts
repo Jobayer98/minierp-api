@@ -5,6 +5,7 @@ interface QueryOptions {
   filterableFields?: string[];
   defaultSort?: string;
   defaultLimit?: number;
+  baseFilter?: Record<string, unknown>;
 }
 
 export interface ParsedQuery {
@@ -25,6 +26,7 @@ export const buildQuery = async <T extends Document>(
     filterableFields = [],
     defaultSort = '-createdAt',
     defaultLimit = 10,
+    baseFilter = {},
   } = options;
 
   const page = Math.max(1, parseInt(rawQuery.page ?? '1', 10));
@@ -32,7 +34,7 @@ export const buildQuery = async <T extends Document>(
   const skip = (page - 1) * limit;
   const sortBy = rawQuery.sortBy ?? defaultSort;
 
-  const filter: Record<string, unknown> = {};
+  const filter: Record<string, unknown> = { ...baseFilter };
 
   if (rawQuery.search && searchableFields.length > 0) {
     filter.$or = searchableFields.map((field) => ({
