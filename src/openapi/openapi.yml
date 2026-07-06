@@ -28,6 +28,8 @@ tags:
   - name: Roles
     description: Role and permission management (Admin only)
 
+paths: {}
+
 components:
   securitySchemes:
     bearerAuth:
