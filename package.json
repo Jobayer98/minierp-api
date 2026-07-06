@@ -12,7 +12,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc && cpx \"src/openapi/**/*.yml\" dist/openapi",
-    "start": "node dist/app.js",
+    "start": "node dist/server.js",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "seed": "tsx src/scripts/seed.ts",
